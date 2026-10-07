@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Quiz du Monde & Madagascar</title>
+  <meta name="description" content="Quiz de culture générale : Monde & Madagascar. Mode Normal/Chrono/Survie, 3 niveaux.">
+  <meta name="theme-color" content="#0f766e" />
+  <link rel="icon" href="icons/icon-quiz-192.png" />
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family: system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; }
+    body { background:#020617; color:#e2e8f0; line-height:1.6; padding:16px; min-height:100dvh; }
+    header { text-align:center; margin-bottom:16px; }
+    h1 { font-size:clamp(20px,4vw,32px); font-weight:800; }
+    p.sub { color:#94a3b8; font-size:clamp(13px,2vw,15px); }
+    main { max-width:680px; margin:0 auto; display:flex; flex-direction:column; gap:14px; }
+    .card { background: radial-gradient(120% 120% at 50% 0%, rgba(45,212,191,.25), rgba(15,23,42,.95)); border:1px solid rgba(45,212,191,.45); border-radius:18px; box-shadow:0 30px 50px -30px rgba(45,212,191,.4); }
+    .inner { padding:clamp(16px,4vw,24px); text-align:center; display:flex; flex-direction:column; gap:10px; }
+    .eyebrow { color:#5eead4; text-transform:uppercase; letter-spacing:.16em; font-size:clamp(11px,2vw,13px); font-weight:700; }
+    h2 { font-size:clamp(20px,6vw,36px); font-weight:800; }
+    p.desc { color:#cbd5f5; font-size:clamp(13px,2vw,15px); }
+    .btn { appearance:none; border:none; border-radius:999px; font-weight:800; font-size:clamp(14px,2vw,16px); padding:14px 26px; background:linear-gradient(90deg,#14b8a6,#22d3ee); color:#02131f; margin:4px auto 0; }
+    .btn.secondary { background:transparent; color:#e2e8f0; border:1px solid rgba(148,163,184,.5); }
+    .panel { display:none; background:linear-gradient(180deg,rgba(30,41,59,.9),rgba(15,23,42,.98)); border:1px solid rgba(148,163,184,.35); border-radius:18px; box-shadow:0 40px 60px -40px rgba(14,165,233,.35); padding:clamp(16px,4vw,24px); flex-direction:column; gap:16px; }
+    .panel.active { display:flex; }
+    .toolbar { display:flex; flex-wrap:wrap; justify-content:space-between; gap:10px; align-items:center; }
+    .group { display:flex; flex-wrap:wrap; gap:8px; }
+    .pill { border:1px solid rgba(148,163,184,.4); border-radius:999px; padding:8px 14px; font-size:clamp(12px,2vw,14px); color:#cbd5f5; }
+    .pill strong { color:#fff; font-weight:700; }
+    .section-title { font-weight:700; font-size:clamp(13px,2vw,15px); }
+    .grid { display:grid; gap:10px; }
+    .modes { grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
+    .levels { grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); }
+    .choice { appearance:none; background:transparent; border:1px solid rgba(148,163,184,.4); border-radius:14px; color:#e2e8f0; text-align:left; padding:12px 16px; display:flex; flex-direction:column; gap:4px; }
+    .choice.active { border-color:rgba(94,234,212,.95); background:radial-gradient(120% 120% at 50% 0%,rgba(45,212,191,.2),transparent); }
+    .choice-title { font-weight:700; }
+    .choice-sub { color:#94a3b8; font-size:clamp(12px,2vw,14px); }
+    .answers { display:grid; gap:10px; }
+    .answer { appearance:none; background:rgba(15,23,42,.8); border:1px solid rgba(148,163,184,.4); border-radius:14px; color:#e2e8f0; text-align:left; padding:14px 16px; font-size:clamp(13px,2vw,15px); }
+    .answer.correct { border-color:rgba(52,211,153,.95); background:radial-gradient(120% 120% at 50% 0%,rgba(52,211,153,.22),transparent); color:#bbf7d0; }
+    .answer.wrong { border-color:rgba(248,113,113,.95); background:radial-gradient(120% 120% at 50% 0%,rgba(248,113,113,.2),transparent); color:#fecaca; }
+    .answer.neutral { opacity:.5; }
+    .answer:disabled { cursor:not-allowed; }
+    .qtext { font-size:clamp(17px,5vw,26px); font-weight:800; line-height:1.25; }
+    .qmeta { color:#94a3b8; font-size:clamp(12px,2vw,14px); display:flex; gap:8px; flex-wrap:wrap; }
+    .result-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; }
+    .rcard { background:rgba(15,23,42,.8); border:1px solid rgba(148,163,184,.4); border-radius:14px; padding:14px 16px; }
+    .rlabel { color:#94a3b8; font-size:clamp(12px,2vw,14px); }
+    .rval { font-size:clamp(24px,8vw,40px); font-weight:800; }
+    footer { text-align:center; color:#475569; font-size:clamp(11px,2vw,13px); margin-top:18px; }
+    .actions { display:flex; flex-wrap:wrap; gap:10px; }
+    .record { background:#064e3b; border:1px solid #10b981; color:#a7f3d0; border-radius:14px; padding:10px 14px; font-weight:700; text-align:center; }
+    .record[hidden] { display:none; }
+    #update-bar { display:none; position:fixed; left:0; right:0; top:0; z-index:100; align-items:center; gap:10px;
+      background:linear-gradient(90deg,#f59e0b,#f97316); color:#1c1002; font-weight:700; font-size:14px;
+      padding:10px 14px calc(10px + env(safe-area-inset-top)); box-shadow:0 6px 20px rgba(0,0,0,.45); }
+    #update-bar.show { display:flex; }
+    #update-bar span { flex:1; }
+    #update-bar button { border:0; border-radius:10px; padding:8px 12px; font-weight:800; cursor:pointer; font-size:13px; }
+    #ub-go { background:#02131f; color:#fbbf24; }
+    #ub-x { background:rgba(0,0,0,.25); color:#1c1002; }
+  </style>
+</head>
+<body>
+  <div id="update-bar" role="status">
+    <span id="ub-txt">⬆️ Mise à jour du Quiz disponible</span>
+    <button id="ub-go">Mettre à jour</button>
+    <button id="ub-x" aria-label="Fermer">✕</button>
+  </div>
+  <header>
+    <h1>Quiz du Monde & Madagascar</h1>
+    <p class="sub">Culture générale · 3 niveaux · 3 modes · Hors ligne</p>
+  </header>
+  <main>
+    <section class="card" id="card-intro">
+      <div class="inner">
+        <span class="eyebrow">Culture générale</span>
+        <h2>Prêt à jouer ?</h2>
+        <p class="desc">Juste le jeu. 3 niveaux, 3 modes, 300 questions.</p>
+        <div class="group" style="justify-content:center">
+          <button class="btn" id="go-play">Jouer</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-menu">
+      <div class="toolbar">
+        <div class="group">
+          <span class="pill">Mode : <strong id="label-mode">Normal</strong></span>
+          <span class="pill">Niveau : <strong id="label-level">Facile</strong></span>
+          <span class="pill">🏆 Record : <strong id="label-hi">—</strong></span>
+          <span class="pill">📉 Plus bas : <strong id="label-lo">—</strong></span>
+        </div>
+      </div>
+      <div>
+        <h3 class="section-title">Mode de jeu</h3>
+        <div class="grid modes" id="modes"></div>
+      </div>
+      <div>
+        <h3 class="section-title">Niveau</h3>
+        <div class="grid levels" id="levels"></div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="btn-start">Jouer</button>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-game">
+      <div class="toolbar">
+        <div class="group">
+          <span class="pill">Question <strong id="text-progress">1/10</strong></span>
+          <span class="pill" id="pill-lives" hidden>Vies : <strong id="text-lives">3</strong></span>
+          <span class="pill" id="pill-chrono" hidden>Temps : <strong id="text-chrono">15 s</strong></span>
+          <span class="pill">Score : <strong id="text-score">0 pts</strong></span>
+        </div>
+        <div class="group">
+          <button class="btn secondary" id="btn-menu-mid">Menu</button>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <div class="qmeta"><span id="text-category">Général</span><span>·</span><span id="text-level-meta">Niveau 1</span></div>
+        <h2 class="qtext" id="text-question">Chargement...</h2>
+      </div>
+      <div class="answers" id="answers"></div>
+      <div class="actions">
+        <button class="btn" id="btn-next" disabled>Question suivante</button>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-result">
+      <div class="toolbar">
+        <div class="group"><span class="pill">Résultat</span></div>
+      </div>
+      <div class="result-grid">
+        <div class="rcard"><div class="rlabel">Score total</div><div class="rval" id="res-score">0</div></div>
+        <div class="rcard"><div class="rlabel">Bonnes réponses</div><div class="rval" id="res-right">0</div></div>
+        <div class="rcard"><div class="rlabel">Mauvaises réponses</div><div class="rval" id="res-wrong">0</div></div>
+        <div class="rcard"><div class="rlabel">Questions jouées</div><div class="rval" id="res-total">0</div></div>
+        <div class="rcard"><div class="rlabel">🏆 Meilleur score</div><div class="rval" id="res-hi">0</div></div>
+        <div class="rcard"><div class="rlabel">📉 Score le plus bas</div><div class="rval" id="res-lo">0</div></div>
+      </div>
+      <div class="record" id="res-record" hidden>🎉 Nouveau record !</div>
+      <div class="actions">
+        <button class="btn" id="btn-restart">Rejouer</button>
+        <button class="btn secondary" id="btn-menu-end">Retour au menu</button>
+      </div>
+    </section>
+  </main>
+  <footer>Créé par NAMBININTSOA Tsiky Fanantenana · tsikynambs@gmail.com</footer>
+
+  <script src="js/quiz-data.js"></script>
+  <script>
+    const QUESTIONS = window.QUIZ_DATA;
+    const MODES=[{id:"normal",label:"Normal",desc:"10 questions, à ton rythme",n:10,lives:0,time:0},{id:"chrono",label:"Chrono",desc:"15 s par question",n:10,lives:0,time:15},{id:"survie",label:"Survie",desc:"3 erreurs max",n:Infinity,lives:3,time:0}];
+    const LEVELS=[{id:1,label:"Facile"},{id:2,label:"Moyen"},{id:3,label:"Difficile"}];
+    let selMode="normal",selLevel=1,game=null,timerId=null;
+    const $=id=>document.getElementById(id), el=(t,a={},txt="")=>{const e=document.createElement(t);Object.entries(a).forEach(([k,v])=>e.setAttribute(k,v));if(txt)e.textContent=txt;return e;}, shuffle=a=>{const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;};
+    function renderModes(){const w=$("modes");w.innerHTML="";MODES.forEach(m=>{const b=el("button",{class:"choice"+(m.id===selMode?" active":"")});const t=el("span",{class:"choice-title"},m.label),s=el("span",{class:"choice-sub"},m.desc);b.append(t,s);b.onclick=()=>{selMode=m.id;renderModes();updateLabels();};w.append(b);});}
+    function renderLevels(){const w=$("levels");w.innerHTML="";LEVELS.forEach(l=>{const b=el("button",{class:"choice"+(l.id===selLevel?" active":"")});b.textContent=l.label;b.onclick=()=>{selLevel=l.id;renderLevels();updateLabels();};w.append(b);});}
+    function loadStats(){try{return JSON.parse(localStorage.getItem("quiz_stats")||"{}")}catch(e){return {}}}
+    function statOf(m){const s=loadStats();return s[m]||{hi:0,lo:null};}
+    function updateLabels(){$("label-mode").textContent=MODES.find(m=>m.id===selMode)?.label||"";$("label-level").textContent=LEVELS.find(l=>l.id===selLevel)?.label||"";const st=statOf(selMode);$("label-hi").textContent=st.hi||"—";$("label-lo").textContent=st.lo==null?"—":st.lo;}
+    function showPanel(id){document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));if(id==="menu")$("panel-menu").classList.add("active");if(id==="game")$("panel-game").classList.add("active");if(id==="result")$("panel-result").classList.add("active");window.scrollTo({top:0,behavior:"smooth"});}
+    $("go-play").onclick=()=>{document.getElementById("card-intro").style.display="none";showPanel("menu");};
+    $("btn-start").onclick=start; $("btn-menu-mid").onclick=()=>{stopTimer();showPanel("menu");}; $("btn-menu-end").onclick=()=>showPanel("menu"); $("btn-restart").onclick=start;
+    const playedKeys=new Set(),qkey=q=>q.q;
+    function freshOrder(pool){const fresh=pool.filter(q=>!playedKeys.has(qkey(q)));const old=pool.filter(q=>playedKeys.has(qkey(q)));return [...shuffle(fresh),...shuffle(old)];}
+    function start(){const mode=MODES.find(m=>m.id===selMode);const pool=QUESTIONS.filter(q=>q.l<=selLevel);const order=freshOrder(pool);game={mode:mode.id,pool,order,i:0,score:0,right:0,wrong:0,lives:mode.lives,answered:false,question:null,max:mode.n};showPanel("game");renderQuestion();}
+    function currentQuestion(){if(game.i>=game.order.length)game.order=freshOrder(game.pool);return game.order[game.i%game.order.length];}
+    function renderQuestion(){const mode=MODES.find(m=>m.id===selMode);const q=currentQuestion();game.question=q;playedKeys.add(qkey(q));game.answered=false;$("text-progress").textContent=isFinite(mode.n)?(game.i+1)+"/"+mode.n:(game.i+1).toString();$("text-score").textContent=game.score+" pts";$("text-category").textContent=q.c;$("text-level-meta").textContent="Niveau "+q.l;const pl=$("pill-lives"),tl=$("text-lives");if(mode.lives>0){pl.hidden=false;tl.textContent=game.lives;}else pl.hidden=true;$("text-question").textContent=q.q;const w=$("answers");w.innerHTML="";q.o.forEach((opt,idx)=>{const b=el("button",{class:"answer"});b.textContent=opt;b.onclick=()=>answer(idx,b);w.append(b);});$("btn-next").disabled=true;const pc=$("pill-chrono"),tc=$("text-chrono");if(mode.time>0){pc.hidden=false;startTimer(mode.time);}else{pc.hidden=true;stopTimer();}}
+    function stopTimer(){if(timerId){clearInterval(timerId);timerId=null;}}
+    function startTimer(sec){stopTimer();const tc=$("text-chrono");tc.textContent=sec+" s";const end=Date.now()+sec*1000;timerId=setInterval(()=>{const left=Math.max(0,end-Date.now());tc.textContent=Math.ceil(left/1000)+" s";if(left<=0){stopTimer();timeout();}},200);}
+    function answer(idx){if(!game||game.answered)return;game.answered=true;stopTimer();const q=game.question,correct=q.a;const btns=Array.from(document.querySelectorAll("#answers .answer"));btns.forEach((b,i)=>{b.disabled=true;if(i===correct)b.classList.add("correct");else if(i===idx&&i!==correct)b.classList.add("wrong");else b.classList.add("neutral");});if(idx===correct){game.right++;game.score+=10;}else{game.wrong++;const mode=MODES.find(m=>m.id===selMode);if(mode.lives>0){game.lives--;const tl=$("text-lives");if(tl)tl.textContent=game.lives;}}$("text-score").textContent=game.score+" pts";const mode=MODES.find(m=>m.id===selMode);if(mode.lives>0&&game.lives<=0){endGame();return;}if(isFinite(mode.n)&&game.i+1>=mode.n)$("btn-next").textContent="Voir le résultat";$("btn-next").disabled=false;$("btn-next").onclick=next;}
+    function timeout(){if(!game||game.answered)return;game.answered=true;const q=game.question,correct=q.a;const btns=Array.from(document.querySelectorAll("#answers .answer"));btns.forEach((b,i)=>{b.disabled=true;if(i===correct)b.classList.add("correct");else b.classList.add("neutral");});game.wrong++;const mode=MODES.find(m=>m.id===selMode);if(mode.lives>0){game.lives--;const tl=$("text-lives");if(tl)tl.textContent=game.lives;}$("text-score").textContent=game.score+" pts";if(mode.lives>0&&game.lives<=0){endGame();return;}if(isFinite(mode.n)&&game.i+1>=mode.n)$("btn-next").textContent="Voir le résultat";$("btn-next").disabled=false;$("btn-next").onclick=next;}
+    function next(){const mode=MODES.find(m=>m.id===selMode);game.i++;if(isFinite(mode.n)&&game.i>=mode.n){endGame();return;}if(mode.lives>0&&game.lives<=0){endGame();return;}renderQuestion();}
+    function endGame(){stopTimer();$("res-score").textContent=game.score;$("res-right").textContent=game.right;$("res-wrong").textContent=game.wrong;$("res-total").textContent=game.right+game.wrong;const s=loadStats();const st=s[game.mode]||(s[game.mode]={hi:0,lo:null});const newHi=game.score>st.hi;if(newHi)st.hi=game.score;if(st.lo==null||game.score<st.lo)st.lo=game.score;s[game.mode]=st;try{localStorage.setItem("quiz_stats",JSON.stringify(s));}catch(e){}$("res-hi").textContent=st.hi;$("res-lo").textContent=st.lo;$("res-record").hidden=!newHi;updateLabels();showPanel("result");}
+    renderModes();renderLevels();updateLabels();
+    if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+    (function(){
+      if(!window.AndroidBridge)return;
+      var SITE="https://tsiky1801.github.io/mon-telephone/";
+      fetch(SITE+"version.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.ok?r.json():null;}).then(function(v){
+        if(!v||!v.v)return;
+        var cur=null;try{cur=AndroidBridge.getVersion?String(AndroidBridge.getVersion()):null;}catch(e){}
+        if(cur&&cur===v.v)return;
+        var key="updSeen_"+v.v;
+        try{if(localStorage.getItem(key)===String(cur))return;}catch(e){}
+        document.getElementById("ub-txt").textContent="⬆️ Mise à jour du Quiz disponible (v"+v.v+")";
+        var bar=document.getElementById("update-bar");
+        function hide(save){if(save){try{localStorage.setItem(key,String(cur));}catch(e){}}bar.classList.remove("show");}
+        document.getElementById("ub-go").onclick=function(){
+          if(AndroidBridge.openExternal)AndroidBridge.openExternal(SITE+"telecharger.html");
+          else if(AndroidBridge.share)AndroidBridge.share("Mise à jour du Quiz — "+SITE);
+          hide(true);
+        };
+        document.getElementById("ub-x").onclick=function(){hide(true);};
+        bar.classList.add("show");
+      }).catch(function(){});
+    })();
+  </script>
+</body>
+</html>
